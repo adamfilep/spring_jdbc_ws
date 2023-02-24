@@ -5,9 +5,16 @@ import com.example.jdbc_ws.model.Building;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public record BuildingService(BuildingDAO buildingDAO){
+    public Optional<Building> findBuildingByName(String name) {
+        return buildingDAO.findAll()
+                .stream()
+                .filter(building -> building.getBuildingName().equals(name))
+                .findFirst();
+    }
     public List<Building> findAll() {
         return buildingDAO.findAll();
     }
