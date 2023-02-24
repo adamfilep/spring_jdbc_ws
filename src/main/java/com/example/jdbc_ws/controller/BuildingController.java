@@ -2,6 +2,7 @@ package com.example.jdbc_ws.controller;
 import com.example.jdbc_ws.dao.BuildingDAO;
 import com.example.jdbc_ws.model.Building;
 import com.example.jdbc_ws.service.BuildingService;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public record BuildingController(BuildingService buildingService) {
         return buildingService.findByCountryCode(countryCode);
     }
 
-    @GetMapping(value = "/buildings", params = {"buildingname", "newCountryCode"})
+    @PutMapping(value = "/buildings", params = {"buildingname", "newCountryCode"})
     public ResponseEntity<Optional<Building>> changeCountry(@RequestParam("buildingname") String buildingName,
                                                 @RequestParam("newCountryCode") String newCountryCode) {
         Optional<Building> maybeBuilding = buildingService.findBuildingByName(buildingName);
@@ -31,4 +32,17 @@ public record BuildingController(BuildingService buildingService) {
         buildingService.changeCountry(buildingName, newCountryCode);
         return new ResponseEntity<>(buildingService.findBuildingByName(buildingName), HttpStatus.OK);
     }
+    @PostMapping(value = "/buildings")
+    public ResponseEntity<Optional<Building>> changeCountryByRespBody(@RequestBody ChangeCountryRequestDTO request) {
+        Optional<Building> maybeBuilding = buildingService.findBuildingByName(request.buildingName());
+        if (maybeBuilding.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        buildingService.changeCountry(request.buildingName(), request.newCountryCode());
+        return new ResponseEntity<>(buildingService.findBuildingByName(request.buildingName()), HttpStatus.OK);
+    }
+
 }
+
+record ChangeCountryRequestDTO(String buildingName, String newCountryCode) {
+    }
